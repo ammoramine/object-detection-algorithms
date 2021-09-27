@@ -1,34 +1,34 @@
-import pytest
-import sys
-# try:
-#     from ..utils import csv_iterable
-# except:
-#     from Code.utils import csv_iterable
-
-from pathlib import Path
-
-dir_file = Path(__file__).parent
-# sys.path.append(str(dir_file.joinpath("../Code")))
-
-from Code.utils import csv_iterable
+# import pytest
+# import sys
+# # try:
+# #     from ..utils import csv_iterable
+# # except:
+# #     from Code.utils import csv_iterable
+#
+# from pathlib import Path
+#
+# dir_file = Path(__file__).parent
+# # sys.path.append(str(dir_file.joinpath("../Code")))
+#
+# from Code.utils import csv_iterable
+# # @pytest.fixture
+#
+#
+# def get_path_csv(mode="train"):
+#     path_csv = dir_file.joinpath(f"../../Data/data/{mode}/labels/detections.csv")
+#     return path_csv
+#
 # @pytest.fixture
-
-
-def get_path_csv(mode="train"):
-    path_csv = dir_file.joinpath(f"../../Data/data/{mode}/labels/detections.csv")
-    return path_csv
-
-@pytest.fixture
-def csv_path_train():
-    path_csv = get_path_csv("train")
-    return path_csv
-
-@pytest.fixture
-def filter_func():
-    def label_filterer(el):
-        return el.LabelName not in ['/m/0dzct']
-    return label_filterer
-
+# def csv_path_train():
+#     path_csv = get_path_csv("train")
+#     return path_csv
+#
+# @pytest.fixture
+# def filter_func():
+#     def label_filterer(el):
+#         return el.LabelName not in ['/m/0dzct']
+#     return label_filterer
+#
 
 @pytest.mark.slow
 def test_if_filter_func_works(csv_path_train,filter_func):
