@@ -4,7 +4,7 @@ from torchvision import transforms
 from functools import partial
 
 try:
-    from .utils import bbox_mod
+    from Code.utils import bbox_mod
 except:
     from Code.utils import bbox_mod
 
@@ -48,8 +48,8 @@ class SelectiveSearch:
 
 
 if __name__ == '__main__':
-    img, lbl1, bbox1 = alg[1]
-    img, lbl2, bbox2 = alg[2]
+    # img, lbl1, bbox1 = alg[1]
+    # img, lbl2, bbox2 = alg[2]
 
     alg_select = SelectiveSearch()
 

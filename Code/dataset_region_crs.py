@@ -19,7 +19,7 @@ except:
 
 
 class DatasetRCNN(Dataset):
-    def __init__(self,mode="train",input_transform=None,target_transform=None):
+    def __init__(self,mode="train"):
         """initisation of the dataset
             :mode : can be equal to train, val or test
         """
@@ -27,9 +27,12 @@ class DatasetRCNN(Dataset):
     ######## init options
         self.data_accessor = data_manager.DataAccessor(mode)
         self.groundTruth = self.read_detections_file()
+        #
+        # self.input_transform = input_transform
+        # self.target_transform = target_transform
+        # self.joint_transform = joint_transform
 
-        self.input_transform = input_transform
-        self.target_transform = target_transform
+        self.bbox_associator = custom_transforms.BboxAssociator()
 
     def read_detections_file(self):
         return self.data_accessor.read_csv_file()
@@ -48,7 +51,7 @@ class DatasetRCNN(Dataset):
         col,row = pil_img.size
 
         # el = self.groundTruth.iloc[idx]
-        bboxes = []
+        bboxes_gd = []
         labels = []
         for row_df,el in df.iterrows():
 
@@ -56,27 +59,17 @@ class DatasetRCNN(Dataset):
             label_name = data_manager.code_to_name_of_class[el.LabelName]
 
             bbox = bbox_mod.Bbox.from_extremes(*bbox)
-            bboxes.append(bbox)
+            bboxes_gd.append(bbox)
             labels.append(label_name)
 
-        return pil_img,bboxes,labels
 
-        #TODO : add transforms here
-
-        # transforms from  image + bboxes to assocaitions (selective_search_bbox,bbox)
-        # transforms from (selective_search_bbox,bbox) to offsets
-        # transforms from label to one_hot_encoding
+        # return imageID,pil_img,bboxes_gd,labels
 
 
-        ##########
-        # return pil_img,label_name,bbox
-        # inpt,outpt = pil_img,(label_name,bbox)
-        # if self.input_transform:
-        #     inpt = self.input_transform(inpt)
-        # if self.target_transform:
-        #     outpt = self.target_transform(outpt)
-        #
-        # return inpt,outpt
+        pbboxes,bboxes_gd,ious = self.bbox_associator(pil_img,bboxes_gd)
+
+        return imageID,pbboxes,bboxes_gd,labels
+
 
 
 
@@ -89,6 +82,11 @@ class DatasetRCNN(Dataset):
 
 if __name__ == '__main__':
     alg = DatasetRCNN()
+    from Code import custom_transforms
+
+    s = custom_transforms.BboxAssociator(0.5)
+    ID, img, bboxes, labels = alg[1]
+
     # self = alg
     pass
     # r = self.csv_iterator
