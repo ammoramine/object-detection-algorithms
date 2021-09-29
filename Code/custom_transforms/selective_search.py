@@ -23,11 +23,15 @@ class SelectiveSearch:
         return self.regions
 
     def apply_selective_search(self,pil_img):
-        img = np.array(pil_img)
-        img_lbl, regions = selectivesearch.selective_search(img, scale=self.scale, min_size=self.min_size)
-        regions = [bbox_mod.Bbox(*region['rect']) for region in regions]
-        return  img_lbl,regions
-
+        try:
+            img = np.array(pil_img)
+            if len(img.shape) == 2:
+                img = np.stack([img]*3,axis=-1)
+            img_lbl, regions = selectivesearch.selective_search(img, scale=self.scale, min_size=self.min_size)
+            regions = [bbox_mod.Bbox(*region['rect']) for region in regions]
+            return  img_lbl,regions
+        except:
+            raise ValueError("pil_img, should be 2D with 1 channel or 3D with 3 channel")
     def filter_regions(self):
         img_area = np.prod(self.img_lbl.shape[:2])
         candidates = []
