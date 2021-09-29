@@ -42,7 +42,7 @@ dirFile = os.path.dirname(__file__)
 
 
 
-BboxParams = namedtuple("Bbox",["x","y","width","height"],defaults=[0]*4)
+BboxParams = namedtuple("BboxParams",["x","y","width","height"],defaults=[0]*4)
 BboxParams.__doc__= """
     * BBoxParams class is a named Tuple, used  to store parameters of a bounding box ,containing the four usual parameters:
     position of the top left pixel, and the height and width, that squares a region of the image.
@@ -68,6 +68,10 @@ class Bbox:
     bbox_params = OnceSettingDescriptor("bbox_params")
     initiated_class = False
     @classmethod
+    def from_bbbox_params(cls,bbox_params):
+        assert isinstance(bbox_params,BboxParams)
+        return cls(*bbox_params)
+    @classmethod
     def from_extremes(cls,LT_pt,RB_pt):
         x_min,y_min = LT_pt
         x_max,y_max = RB_pt
@@ -79,9 +83,20 @@ class Bbox:
         self.bbox_params = bbox_params
 
     def __repr__(self):
-        return self.bbox_params.__repr__()
+        return self.bbox_params.__repr__().replace("BboxParams","Bbox")
     def __iter__(self):
         return self.bbox_params.__iter__()
+    def __hash__(self):
+        return hash(self.x)^hash(self.y)^hash(self.width)^hash(self.height)
+
+    def __eq__(self, other):
+        res = all([self.x == other.x,
+                  self.y == other.y,
+                   self.width == other.width,
+                   self.height == other.height
+                  ])
+        return res
+
     def __getattr__(self, item):
         if item in  ['x','y','width','height']:
             res = self.bbox_params.__getattribute__(item)
@@ -115,7 +130,7 @@ class Bbox:
 
     def get_iou(self, other_bbox, epsilon=1e-5):
 
-        area_overlap = self.intersectionn(other_bbox)
+        area_overlap = self.intersection(other_bbox)
         area_a = self.area
         area_b = other_bbox.area
         area_combined = area_a + area_b - area_overlap
