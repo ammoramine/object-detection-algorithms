@@ -88,7 +88,8 @@ class Bbox:
         return self.bbox_params.__iter__()
     def __hash__(self):
         return hash(self.x)^hash(self.y)^hash(self.width)^hash(self.height)
-
+    # def __next__(self):
+    #     pass
     def __eq__(self, other):
         res = all([self.x == other.x,
                   self.y == other.y,
@@ -111,11 +112,15 @@ class Bbox:
             return self.y
         elif item == 'area':
             return self.get_area()
-        else:
-            raise ValueError(f"item {item} is not recognized")
+
+        #TODO : understand why the pandas Dataframe object, call the __next__ method
+        # of bbox_mod
+
+        # else:
+        #     raise ValueError(f"item {item} is not recognized")
 
     def intersection(self,other_bbox):
-        assert isinstance(other_bbox,Bbox)
+        assert isinstance(other_bbox,type(self))
         x1 = max(self.x_min, other_bbox.x_min)
         y1 = max(self.y_min, other_bbox.y_min)
 
@@ -137,9 +142,24 @@ class Bbox:
         iou = area_overlap / (area_combined+epsilon)
         return iou
 
+    def __sub__(self,other):
+        res = np.array([getattr(self,el)-getattr(other,el) for el in ["x","y","x_max","y_max"]])
+        return res
+
+    def get_rel_diff_img(self,other,pil_img):
+        """
+            get the difference, between the TL and BR points with 'other bbox
+        """
+        diff = self - other
+        w,h = pil_img.size
+        res = diff / np.array([w,h,w,h])
+        return res
+
     def get_area(self):
         area = self.width*self.height
         return area
+
+
 
 
     def draw_on_image(self,img,with_show=True):
