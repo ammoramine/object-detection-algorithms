@@ -78,8 +78,9 @@ class DataPreparer_dataRCNN:
         res = [self.get_offsets_for_idx(idx) for idx,el in self.data.iterrows()]
         return res
 
-    # def save(self):
-        # re_path_csv = Path(f"../../Data/data/{mode}/labels/detections_for_RCNN.csv")
+    def save(self):
+        path_csv  = data_manager.get_path_detections_csv_for_RCNN_dataset(self.mode)
+        self.data.to_csv(path_csv)
 
 
 if __name__ == '__main__':
@@ -90,7 +91,8 @@ if __name__ == '__main__':
 
     alg = DataPreparer_dataRCNN(mode,truncate=truncate)
 
-    df = alg.read_serialized_data()
+    alg.save()
+    # df = alg.read_serialized_data()
     # res = [[label if el1.get_iou(el2) > 0.3 else self.background_label for (el1, el2, label) in zip(a, b, c)] for (a,b,c) in zip(df.p_bboxes,df.gd_bboxes,df.labels_gd_bboxes)]
 
     # self.data["labels"] = self.get_updated_labels()
