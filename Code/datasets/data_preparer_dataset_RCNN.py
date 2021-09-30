@@ -1,5 +1,5 @@
 import pandas as pd
-
+from pathlib import Path
 
 try:
     from ...Data import data_manager
@@ -30,13 +30,17 @@ class DataPreparer_dataRCNN:
         self.mode = mode
         self.path_csv = self.get_path_csv()
         self.background_label = "Background"
+        self.iou_thresh =  0.3
+        self.truncate= truncate
+
 
 
         self.data = self.read_serialized_data()
-        if isinstance(truncate,int):
-            self.data = self.data[:truncate]
 
-        # self.data = self.update_labels()
+        # import pdb
+        self.data = self.update_labels()
+        self.data["offsets"] = self.get_offsets()
+        # self.data = pdb.runcall(self.update_labels)
 
 
     def get_path_csv(self):
@@ -44,13 +48,13 @@ class DataPreparer_dataRCNN:
         return path_csv
     def read_serialized_data(self):
         """read and convert the data of path_csv_ to dataframe format"""
-        res = utils.read_rpos_csv(self.path_csv)
+        res = utils.read_rpos_csv(self.path_csv,self.truncate)
 
         res = pd.DataFrame(res,columns=["imageID","p_bboxes","gd_bboxes","labels_gd_bboxes"])
         return res
 
     def get_updated_labels_for_image(self,bbox_inpt,bbox_oupt,labels_oupt):
-        return [label if el1.get_iou(el2) > 0.3 else self.background_label for (el1, el2, label) in zip(bbox_inpt,bbox_oupt,labels_oupt)]
+        return [label if el1.get_iou(el2) > self.iou_thresh else self.background_label for (el1, el2, label) in zip(bbox_inpt,bbox_oupt,labels_oupt)]
 
     def get_updated_labels(self):
         df = self.data
@@ -62,7 +66,20 @@ class DataPreparer_dataRCNN:
         res = self.data.drop("labels_gd_bboxes", axis=1)
         return res
 
-    # def get_offsets(self):
+    def get_offsets_for_idx(self,idx):
+        a = self.data.p_bboxes[idx]
+        b = self.data.gd_bboxes[idx]
+        f = data_manager.DataAccessor(mode=self.mode)
+        c = f.get_pil_image_from_name(self.data.imageID[0])
+        offsets = [aa.get_rel_diff_img(bb,c) for aa,bb in zip(a,b)]
+        return offsets
+
+    def get_offsets(self):
+        res = [self.get_offsets_for_idx(idx) for idx,el in self.data.iterrows()]
+        return res
+
+    # def save(self):
+        # re_path_csv = Path(f"../../Data/data/{mode}/labels/detections_for_RCNN.csv")
 
 
 if __name__ == '__main__':
