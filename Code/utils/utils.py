@@ -59,7 +59,8 @@ def recover_bboxes_gd_from_idx(iterable):
         imageID, pbboxes, bboxes_gd_idxs, labels, idx_to_bbox_gd = el
 
         bboxes_gd = [idx_to_bbox_gd[idx] for idx in bboxes_gd_idxs]
-        res.append((imageID, pbboxes, bboxes_gd, labels))
+        labels_per_bbox = [labels[idx] for idx in bboxes_gd_idxs]
+        res.append((imageID, pbboxes, bboxes_gd, labels_per_bbox))
     return res
 
 def read_csv_and_eval(path_csv = "producedData/tmp_data/tmp.csv",collumns_eval=("pbboxes","idx_to_bbox","bboxes_gd_idx","labels")):
@@ -72,3 +73,14 @@ def read_csv_and_eval(path_csv = "producedData/tmp_data/tmp.csv",collumns_eval=(
 
 def eval_col_of_df(col):
     return [eval(el) for el in col]
+
+
+def read_rpos_csv(path_csv):
+
+    aa = read_csv_and_eval(path_csv)
+    res1 = aa.values.tolist()
+    res11 = recover_bboxes_gd_from_idx(res1)
+
+    res = convert_bboxes_params_to_bboxes(res11)
+
+    return res
