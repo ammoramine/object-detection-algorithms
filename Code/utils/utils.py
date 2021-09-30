@@ -63,8 +63,14 @@ def recover_bboxes_gd_from_idx(iterable):
         res.append((imageID, pbboxes, bboxes_gd, labels_per_bbox))
     return res
 
-def read_csv_and_eval(path_csv = "producedData/tmp_data/tmp.csv",collumns_eval=("pbboxes","idx_to_bbox","bboxes_gd_idx","labels")):
-    df = pd.read_csv(path_csv, index_col=0)
+def read_csv_and_eval(path_csv = "producedData/tmp_data/tmp.csv",collumns_eval=("pbboxes","idx_to_bbox","bboxes_gd_idx","labels"),truncate=None):
+
+    if isinstance(truncate,int):
+        df = pd.read_csv(path_csv, index_col=0,nrows = truncate)
+    else:
+        df = pd.read_csv(path_csv, index_col=0)
+
+
 
     for name_col,el in df.items():
         if name_col in  collumns_eval:
@@ -75,9 +81,9 @@ def eval_col_of_df(col):
     return [eval(el) for el in col]
 
 
-def read_rpos_csv(path_csv):
+def read_rpos_csv(path_csv,truncate=None):
 
-    aa = read_csv_and_eval(path_csv)
+    aa = read_csv_and_eval(path_csv,truncate=truncate)
     res1 = aa.values.tolist()
     res11 = recover_bboxes_gd_from_idx(res1)
 
