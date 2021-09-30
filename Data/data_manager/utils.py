@@ -17,6 +17,11 @@ def get_path_detection_csv_filtered(mode):
     path_csv = path_manager.get_path_detection_csv_filtered()
     return path_csv
 
+def get_path_detecion_csv_filtered_with_rpropos(mode):
+    path_manager = structure_path_data.PathManager(mode)
+    path_csv = path_manager.get_path_detecion_csv_filtered_with_rpropos()
+    return path_csv
+
 def get_path_image_folder(mode):
     path_manager = structure_path_data.PathManager(mode)
     path_folder_images = path_manager.get_path_folder_images()

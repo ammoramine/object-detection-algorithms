@@ -39,8 +39,15 @@ class PathManager:
         path_detections_csv = self.path_to_data_folder.joinpath(f"data/{self.mode_str}/labels/detections.csv")
         return path_detections_csv
 
-    def get_path_detection_csv_filtered(self,ext_replace="_filtered.csv"):
-        path = Path(str(self.get_path_detection_csv()).replace(".csv",ext_replace))
+    def get_path_detecion_csv_filtered_with_rpropos(self,):
+        return self.replace_detection_csv_ext(ext_replace="_filtered_with_region_proposals.csv")
+
+
+    def get_path_detection_csv_filtered(self):
+        return self.replace_detection_csv_ext(ext_replace="_filtered.csv")
+
+    def replace_detection_csv_ext(self,ext_replace):
+        path = Path(str(self.get_path_detection_csv()).replace(".csv", ext_replace))
         return path
 
     def get_path_folder_images(self):
@@ -49,6 +56,8 @@ class PathManager:
     def get_path_label_code_corres_csv(self):
         path_csv = self.path_to_data_folder.joinpath(f"data/{self.mode_str}/metadata/classes.csv")
         return path_csv
+
+
 
 if __name__ == '__main__':
     alg = PathManager()
