@@ -153,6 +153,7 @@ class Bbox:
         diff = self - other
         w,h = pil_img.size
         res = diff / np.array([w,h,w,h])
+        res = list(res)
         return res
 
     def get_area(self):
@@ -168,6 +169,13 @@ class Bbox:
         s.rectangle(bbox_as_extrems,width=10,outline="red")
         if with_show:
             img.show()
+
+    def crop_image(self,pil_image):
+        """crop the image such that """
+
+        limits = (self.x_min,self.y_min,self.x_max,self.y_max)
+        return pil_image.crop(limits)
+
 
 
 
