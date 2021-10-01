@@ -6,7 +6,7 @@ class RCNNLoss:
         self.sl1 = nn.L1Loss()
         self.lmb = 10.0
 
-    def loss_fn(self, pred, target):
+    def __call__(self, pred, target):
         probs, _deltas = pred
         labels, deltas = target
 
