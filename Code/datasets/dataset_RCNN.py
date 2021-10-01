@@ -35,13 +35,16 @@ class DatasetRCNN(Dataset):
             :mode : can be equal to train, val or test
         """
         self.mode = mode
-        self.path_csv = self.read_prepared_data_for_RCNN()
-        self.data_accessor = data_manager.DataAccessor(mode)
+        # self.path_csv = self.read_prepared_data_for_RCNN()
+        # self.data_for_RCNN_dataset = utils.read_csv_and_eval(self.path_csv,collumns_eval=["p_bboxes",'gd_bboxes','labels','offsets'])
+
+        self.data_accessor = data_manager.DataAccessor(self.mode)
+        self.data_for_RCNN_dataset = self.read_prepared_data_for_RCNN()
+
         self.with_final_transform = with_final_transform
 
 
 
-        self.df = utils.read_csv_and_eval(self.path_csv,collumns_eval=["p_bboxes",'gd_bboxes','labels','offsets'])
 
         self.all_labels = self.get_all_labels()
 
@@ -49,25 +52,25 @@ class DatasetRCNN(Dataset):
 
     def get_all_labels(self):
         all_labels = []
-        [all_labels.extend(el.labels) for idx, el in self.df.iterrows()]
+        [all_labels.extend(el.labels) for idx, el in self.data_for_RCNN_dataset.iterrows()]
 
         all_labels = utils.remove_duplicate_of_iterable(all_labels)
         return all_labels
 
 
     def read_prepared_data_for_RCNN(self):
-        return data_manager.get_path_detections_csv_for_RCNN_dataset(self.mode)
+        return self.data_accessor.read_data_prepared_for_RCNN()
 
     def get_pil_image_from_name(self,image_id):
         return self.data_accessor.get_pil_image_from_name(image_id)
 
     def __len__(self):
-        return len(self.df)
+        return len(self.data_for_RCNN_dataset)
 
 
     def __getitem__(self, idx):
 
-        imageID,p_bboxes,gd_bboxes,labels,offsets  = self.df.iloc[idx]
+        imageID,p_bboxes,gd_bboxes,labels,offsets  = self.data_for_RCNN_dataset.iloc[idx]
 
         pil_img = self.get_pil_image_from_name(imageID)
 
