@@ -8,8 +8,13 @@ class RCNNMetric(Metric):
         self.add_state("confusion_matrix",torch.zeros(nb_classes,nb_classes).long(),sum)
 
     def update(self,preds,targets):
-        for pred,target in (preds,targets):
-            pred = torch.argmax(pred[0], axis=1)
+        """
+        :param preds: of shape (B,C) where C = self.nb_classes
+        :param targets: of shape (B), containins ints on range({self.nb_classes})
+        :return:
+        """
+        preds = torch.argmax(preds,axis=1)
+        for pred,target in zip(preds,targets):
             self.confusion_matrix[pred,target] += 1
 
 
