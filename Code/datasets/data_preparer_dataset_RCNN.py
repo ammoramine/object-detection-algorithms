@@ -46,7 +46,7 @@ class DataPreparer_dataRCNN:
 
     def read_data_of_region_crs(self):
         """read and convert the data of path_csv_ to dataframe format"""
-        data_for_RCNN_dataset = self.data_accessor.read_data_of_region_crs()
+        data_for_RCNN_dataset = self.data_accessor.read_data_of_region_crs(self.truncate)
         return data_for_RCNN_dataset
 
     def get_updated_labels_for_image(self,bbox_inpt,bbox_oupt,labels_oupt):
@@ -80,8 +80,10 @@ class DataPreparer_dataRCNN:
 
 
 if __name__ == '__main__':
-    mode = "validation"
-    truncate = 10
+    # mode = "validation"
+    # truncate = 100
+    mode = "train"
+    truncate = 500
     # path_csv = data_manager.get_path_detecion_csv_filtered_with_rpropos(mode)
     # res = utils.read_rpos_csv(path_csv)
 
