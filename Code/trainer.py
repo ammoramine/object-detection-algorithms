@@ -7,14 +7,14 @@ except:
     from Code.models import rcnn_model
 
 from torch import optim
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 from functools import partial
+from collections import namedtuple
 
 from  Code.datasets.dataset_RCNN import DatasetRCNN
-# loss_func = RCNNLoss().loss_fn
-# metric = RCNNMetric(3)
-# optimizer = optim.SGD(self.model.parameters(), lr=1e-3)
 
+Results = namedtuple("Results",["loss", "loc_loss", "regr_loss","accuracy"])
 class Trainer:
     def __init__(self,model,train_loader,val_loader,loss_func,metric,optimizer):
         self.model = model
@@ -23,6 +23,10 @@ class Trainer:
         self.loss_func = loss_func
         self.metric = metric
         self.optimizer = optimizer
+
+        self.val_results = []
+        self.train_results = []
+
 
 
     def get_res_on_epoch(self,batch_loader,batch_processor):
@@ -34,7 +38,8 @@ class Trainer:
         """
         self.metric.reset()
         loss,loc_loss,regr_loss,accs = 0,0,0,0
-        for data in batch_loader:
+        from tqdm import tqdm
+        for data in tqdm(batch_loader):
             loss_tmp, loc_loss_tmp, regr_loss_tmp = batch_processor(data)
             loss += loss_tmp
             loc_loss += loc_loss_tmp
@@ -58,6 +63,9 @@ class Trainer:
     def iterate_over_multiple_epochs(self,nb_epochs):
         for epoch in range(nb_epochs):
             trn_out, val_out = self.iterate_over_epoch()
+
+            self.val_results.append(Results(*val_out))
+            self.train_results.append(Results(*trn_out))
 
             message = f"result for epoch :"
             if isinstance(epoch,int):
@@ -98,8 +106,8 @@ class Trainer:
 
 
 if __name__ == '__main__':
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+    device = "cpu"
     train_ds = DatasetRCNN(mode="train")
     collate_fn = partial(train_ds.collate_fn,device=device)
     train_loader = DataLoader(train_ds, batch_size=2, collate_fn=collate_fn, drop_last=True,shuffle=True)
@@ -110,7 +118,7 @@ if __name__ == '__main__':
 
 
     nb_classes = 3
-    model = rcnn_model.RCNN(nb_classes)
+    model = rcnn_model.RCNN(nb_classes).to(device)
 
     loss_func = loss.RCNNLoss()
 
@@ -120,6 +128,16 @@ if __name__ == '__main__':
 
     metric = RCNNMetric(nb_classes)
 
+    args = dict()
+    args["model"] = model
+    args["train_loader"] = train_loader
+    args["val_loader"] = val_loader
+    args["loss_func"] = loss_func
+    args["metric"] = metric
+    args["optimizer"] = optimizer
 
 
-    alg_trainer =  Trainer(model, train_loader, val_loader, loss_func, metric, optimizer)
+
+    alg_trainer =  Trainer(**args)
+
+    alg_trainer.iterate_over_multiple_epochs(5)
