@@ -22,6 +22,7 @@ class FinalRCNNTransform:
 
         label_to_target = {l: t for t, l in enumerate(self.all_labels)}
         target_to_label = {t: l for l, t in label_to_target.items()}
+        assert label_to_target['Background'] == 0
         return label_to_target,target_to_label
 
     def preprocess_image(self,img):
