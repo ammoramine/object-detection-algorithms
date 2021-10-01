@@ -116,7 +116,7 @@ if __name__ == '__main__':
     aa = pd.DataFrame(res1, columns=["ID", "pbboxes", "bboxes_gd_idx", "labels", "idx_to_bbox"])
 
     from pathlib import Path
-    re_path_csv = Path(f"../Data/data/{mode}/labels/detections_filtered_with_region_proposals.csv")
+    re_path_csv = Path(f"../../Data/data/{mode}/labels/detections_filtered_with_region_proposals.csv")
     path_csv = dir_file.joinpath(re_path_csv)
     aa.to_csv(path_csv)
 
