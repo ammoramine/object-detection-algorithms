@@ -18,10 +18,12 @@ dir_file = Path(__file__).parent
 
 
 try:
+    from .. import utils
     from ..utils import bbox_mod
     from ...Data import data_manager
     from .. import custom_transforms
 except:
+    from Code import utils
     from Code.utils import bbox_mod
     from Data import data_manager
     from Code import custom_transforms
@@ -125,7 +127,7 @@ if __name__ == '__main__':
 
     train_ds = DatasetRCNN(mode="train")
 
-    from torch.utils.data import TensorDataset, DataLoader
+    from torch.utils.data import DataLoader
     from functools import partial
     collate_fn = partial(train_ds.collate_fn,device=device)
     train_loader = DataLoader(train_ds, batch_size=2, collate_fn=collate_fn, drop_last=True,shuffle=True)
