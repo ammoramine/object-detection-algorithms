@@ -28,14 +28,15 @@ class DataPreparer_dataRCNN:
     """
     def __init__(self,mode,truncate = None):
         self.mode = mode
-        self.path_csv = self.get_path_csv()
+        self.data_accessor = data_manager.DataAccessor(self.mode)
+
         self.background_label = "Background"
         self.iou_thresh =  0.3
         self.truncate= truncate
 
 
 
-        self.data = self.read_serialized_data()
+        self.data = self.read_data_of_region_crs()
 
         # import pdb
         self.data = self.update_labels()
@@ -43,15 +44,10 @@ class DataPreparer_dataRCNN:
         # self.data = pdb.runcall(self.update_labels)
 
 
-    def get_path_csv(self):
-        path_csv = data_manager.get_path_detecion_csv_filtered_with_rpropos(self.mode)
-        return path_csv
-    def read_serialized_data(self):
+    def read_data_of_region_crs(self):
         """read and convert the data of path_csv_ to dataframe format"""
-        res = utils.read_rpos_csv(self.path_csv,self.truncate)
-
-        res = pd.DataFrame(res,columns=["imageID","p_bboxes","gd_bboxes","labels_gd_bboxes"])
-        return res
+        data_for_RCNN_dataset = self.data_accessor.read_data_of_region_crs()
+        return data_for_RCNN_dataset
 
     def get_updated_labels_for_image(self,bbox_inpt,bbox_oupt,labels_oupt):
         return [label if el1.get_iou(el2) > self.iou_thresh else self.background_label for (el1, el2, label) in zip(bbox_inpt,bbox_oupt,labels_oupt)]
@@ -84,15 +80,15 @@ class DataPreparer_dataRCNN:
 
 
 if __name__ == '__main__':
-    mode = "train"
+    mode = "validation"
     truncate = 10
-    path_csv = data_manager.get_path_detecion_csv_filtered_with_rpropos(mode)
-    res = utils.read_rpos_csv(path_csv)
+    # path_csv = data_manager.get_path_detecion_csv_filtered_with_rpropos(mode)
+    # res = utils.read_rpos_csv(path_csv)
 
     alg = DataPreparer_dataRCNN(mode,truncate=truncate)
 
     alg.save()
-    # df = alg.read_serialized_data()
+    # df = alg.read_data_of_region_crs()
     # res = [[label if el1.get_iou(el2) > 0.3 else self.background_label for (el1, el2, label) in zip(a, b, c)] for (a,b,c) in zip(df.p_bboxes,df.gd_bboxes,df.labels_gd_bboxes)]
 
     # self.data["labels"] = self.get_updated_labels()
