@@ -35,7 +35,8 @@ class DataAccessor:
         :return: data represented as a dataframe
         """
         path_csv = data_manager.get_path_detections_csv_for_RCNN_dataset(self.mode)
-        assert path_csv.exists(),f"should launch data_preparer_dataset_RCNN.py for mode {self.mode}"
+        assert path_csv.exists(),f"{path_csv} doesn't exists" \
+                                 f"should launch data_preparer_dataset_RCNN.py for mode {self.mode}"
         df = utils_data_reading.read_csv_and_eval(path_csv,collumns_eval=["p_bboxes",'gd_bboxes','labels','offsets'])
         return df
 
@@ -48,7 +49,8 @@ class DataAccessor:
         """
 
         path_csv = data_manager.get_path_detecion_csv_filtered_with_rpropos(self.mode)
-        assert path_csv.exists(),f"should launch data_preparer_dataset_RCNN.py for mode {self.mode}"
+        assert path_csv.exists(),f"{path_csv} doesn't exists" \
+                                 f"should launch dataset_region_crs.py for mode {self.mode}"
 
         res = utils_data_reading.read_rpos_csv(path_csv,truncate)
 
@@ -59,5 +61,6 @@ class DataAccessor:
         path_img = self.path_image_folder.joinpath(image_id + ".jpg")
         assert path_img.exists(),f"image_id doesn't exists on the folder {self.path_image_folder}"
         pil_image = Image.open(path_img)
+        pil_image = pil_image.convert("RGB")
         # print(path_img)
         return pil_image
