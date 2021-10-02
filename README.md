@@ -1,2 +1,2 @@
-# object-detection-with-R-CNN
-implementation of the R-CNN algorithm with pytorch
+# object-detection-algorithms
+implementation of  algorithm of objects detection with pytorch.
