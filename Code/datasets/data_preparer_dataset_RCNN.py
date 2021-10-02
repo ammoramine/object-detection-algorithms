@@ -23,8 +23,7 @@ class DataPreparer_dataRCNN:
         of label of the groundTruth bbox)
         * offset between the associated bbox, and the ground Truth bbox, expressed in terms
         as a ratio to the shape of the whole image :
-        TODO : test with relative difference insted , replace the shape of the image, by
-        the shape of the target bbox
+        TODO : YOLO uses relative difference insted ,
     """
     def __init__(self,mode,truncate = None):
         self.mode = mode
