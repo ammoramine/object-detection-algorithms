@@ -15,9 +15,12 @@ dir_file = Path(__file__).parent
 try:
     from .utils import bbox_mod
     from ..Data import data_manager
+    from . import custom_transforms
 except:
     from Code.utils import bbox_mod
     from Data import data_manager
+    from Code import custom_transforms
+
 
 
 class DatasetRegionCrs(Dataset):
@@ -90,7 +93,6 @@ class DatasetRegionCrs(Dataset):
 #TODO : to be tested
 
 if __name__ == '__main__':
-    from Code import custom_transforms
 
     bbox_associator_inst = custom_transforms.BboxAssociator()
 
