@@ -22,7 +22,7 @@ import numpy as np,cv2
 
 class OnceSettingDescriptor:
     def __init__(self, storage_name):
-        print(f"setting descriptor for {storage_name}")
+        print(f"{storage_name} can be set only once")
         self.storage_name = storage_name
     def __set__(self, instance, value):
         if instance.initiated_class:
@@ -62,8 +62,15 @@ BboxParams.__doc__= """
 
 class Bbox:
     """
-        class that contains only one paramter that can't be modified : an instance of 'BBoxParams'
+        class that contains only one parameter that can't be modified : an instance of 'BBoxParams'
 
+        class that provides routines, to computes informations about the actual bbox,
+        informations in relation with other bboxes,
+        and routines, to manipulate images : draw the current bbox on a (PIL) image, to crop it,
+        and to write text on it.
+
+        For safety, the bbox is immutable, but provides class methods to create new ones,
+        differently
     """
     bbox_params = OnceSettingDescriptor("bbox_params")
     initiated_class = False
@@ -81,6 +88,9 @@ class Bbox:
     def __init__(self,x=0,y=0,width=0,height=0):
         bbox_params = BboxParams(x,y,width,height)
         self.bbox_params = bbox_params
+
+    #### routines to get informations about the actual bbox
+
 
     def __repr__(self):
         return self.bbox_params.__repr__().replace("BboxParams","Bbox")
@@ -119,6 +129,24 @@ class Bbox:
         # else:
         #     raise ValueError(f"item {item} is not recognized")
 
+    def get_area(self):
+        area = self.width*self.height
+        return area
+
+    #### rountines to compute properties between the actual bbox, and an other bbox
+
+    def check_inclusion(self,other_bbox):
+        """
+        check if center of other_bbox (other_bbox.x,other_bbox.y), is included in bbox self
+        :param other_bbox: of type BboxWithImgShape, same as self
+        :return: True if the test succeds , False other_bboxwise
+        """
+        tmp1 = (self.x <= other_bbox.x ) * (other_bbox.x < self.x_max)
+        tmp2 = (self.y <= other_bbox.y ) * (other_bbox.y < self.y_max)
+
+        return  tmp1*tmp2
+
+
     def intersection(self,other_bbox):
         assert isinstance(other_bbox,type(self))
         x1 = max(self.x_min, other_bbox.x_min)
@@ -148,7 +176,11 @@ class Bbox:
 
     def get_rel_diff_img(self,other,pil_img):
         """
-            get the difference, between the TL and BR points with 'other bbox
+            get the difference, between the TL and BR points with 'other bbox,
+            divided by the size of image (thus the 'rel' of method's name),
+            i.e ((width, x) with image's width, and (height,y) with image's height)
+
+            remarks : used only with the RCNN algorithm
         """
         diff = self - other
         w,h = pil_img.size
@@ -156,19 +188,17 @@ class Bbox:
         res = list(res)
         return res
 
-    def get_area(self):
-        area = self.width*self.height
-        return area
 
 
+#### rountines to manipulate pil_image, with bbox
 
 
-    def draw_on_image(self,img,with_show=True):
-        s = ImageDraw.Draw(img)
+    def draw_on_image(self,pil_image,with_show=True):
+        s = ImageDraw.Draw(pil_image)
         bbox_as_extrems = ((self.x_min,self.y_min),(self.x_max,self.y_max))
         s.rectangle(bbox_as_extrems,width=10,outline="red")
         if with_show:
-            img.show()
+            pil_image.show()
 
     def crop_image(self,pil_image):
         """crop the image such that """
@@ -178,114 +208,6 @@ class Bbox:
 
 
 
-
-
-    # def get_center_bbox(self):
-    #     """return center of the bounding box"""
-    #     x,y,width,height,_ = self.bbox_params
-    #     res = (height/2, width/2)
-    #     return res
-
-    # #TODO (ideally): add optional paramter for the
-    # def shift_center_bbox(self,relative_position_row_col):
-    #     """
-    #     shift the center to "relative_position_row_col"
-    #     :param: relative_position_row_col containing the row index and col index of
-    #     the new position relative to the top-left point of the bbox
-    #     """
-    #     (y_cen,x_cen) =  self.get_center_bbox()
-    #     shift = relative_position_row_col[0]-y_cen,relative_position_row_col[1]-x_cen
-    #     return self.construct_new_bbox(y = self.bbox_params.y+shift[0],x = self.bbox_params.x+shift[1])
-
-    # def rescale_bbox(self,scale):
-    #     """
-    #      change the scale value
-    #     """
-    #     assert  scale >0
-    #     tmp = self.bbox_params._asdict().copy()
-    #     old_scale = tmp["scale"]
-    #     factor_scale = scale/old_scale
-    #     tmp["x"] *= factor_scale
-    #     tmp["y"] *= factor_scale
-    #     tmp["width"] *= factor_scale
-    #     tmp["height"] *= factor_scale
-    #     tmp["scale"] = scale
-    #     return self.construct_new_bbox(**tmp)
-    #
-    # def get_back_to_absolute_scale(self):
-    #     return self.rescale_bbox(scale=1)
-    #
-    # def modify_width_and_height(self,new_width,new_height):
-    #     """
-    #         modify width and height of bbox keeping the same center
-    #     """
-    #     x,y,width,height,_ = self.bbox_params
-    #     new_x = x  + (width - new_width)/2
-    #     new_y = y  + (height - new_height)/2
-    #     return self.construct_new_bbox(x=new_x, y=new_y, width=new_width, height=new_height)
-    #
-    # def rescale_bbox_to_new_scale_adding_extending_borders(self,scale,percent_width=0,percent_height=0):
-    #     """
-    #         change the scale keeping the same center, with new width and height equal to:
-    #         width * (1+percent_width)
-    #         height * (1+percent_height)
-    #     """
-    #     #TODO: add the same routine, that extends the absolute height and width instead
-    #     new_bbox_instance = self.rescale_bbox(scale)
-    #     width_target = self.bbox_params.width * (1+percent_width)
-    #     height_target = self.bbox_params.height * (1+percent_height)
-    #     new_bbox_instance = new_bbox_instance.modify_width_and_height(new_width=width_target,new_height=height_target)
-    #     return new_bbox_instance
-    #
-    # def construct_new_bbox(self,**kwparams):
-    #     s = self.bbox_params._asdict().copy()
-    #     s.update(**kwparams)
-    #     cls = type(self)
-    #     return cls(**s)
-    #
-    # def get_limits(self):
-    #     """
-    #         returns a four parameters, the first row of the bounding box, the last row
-    #         thr first collum, and the last one
-    #     """
-    #     a = int(self.y)
-    #     b = int(self.y+self.height)
-    #
-    #     c = int(self.x)
-    #     d = int(self.x+self.width)
-    #
-    #     return a,b,c,d
-    #
-    #
-    # def crop_image(self,image):
-    #     """crop the image such that """
-    #     if self.scale != 1:
-    #         bbox_at_aboslute_scale = self.get_back_to_absolute_scale()
-    #     else:
-    #         bbox_at_aboslute_scale = self
-    #     a,b,c,d = bbox_at_aboslute_scale.get_limits()
-    #     cropped_image = image[a:b,c:d]
-    #     resized_cropped_image = self.resize_image(cropped_image)
-    #     return resized_cropped_image
-    #
-    # def resize_image(self,image):
-    #     return cv2.resize(image,fx=self.scale,fy=self.scale,dsize=(0,0))
-    #
-    # def draw_or_show_crop_on_image(self,image,draw=True,color=(255,0,0),failure=False):
-    #     image = image.copy()
-    #     new_bbox = self.get_back_to_absolute_scale()
-    #     a, b, c, d = new_bbox.get_limits()
-    #     p1 = (c,a)
-    #     p2 = (d,b)
-    #     if failure:
-    #         self.putText(image)
-    #     else:
-    #         cv2.rectangle(image, p1, p2, color, 2, 1)
-    #     if draw:
-    #         return image
-    #     else:
-    #         utils.show_multiple(image)
-    #
     # def putText(self,image,sentence = "Failure"):
     #     """ at top left of bounding_box"""
     #     position = (int(self.x),int(self.y))
