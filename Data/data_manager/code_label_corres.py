@@ -10,6 +10,8 @@ PathManager = structure_path_data.PathManager
 Mode = structure_path_data.Mode
 # path_detections_csv = dir_file.parent.parent.joinpath(f"Data/data/{mode}/labels/detections.csv")
 
+# self.background_label = "Background"
+background_label = "Background"
 class CodeLabelCorres:
     def __init__(self,mode=Mode.train):
         self.path_csv = PathManager(mode=mode).get_path_label_code_corres_csv()
@@ -25,3 +27,6 @@ class CodeLabelCorres:
     def get_code_from_labels(self,labels_names):
         codes = [self.code_to_name_of_class[label] for label in labels_names]
         return codes
+
+
+label_to_int = dict()
