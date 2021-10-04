@@ -29,7 +29,8 @@ class DataPreparer_dataRCNN:
         self.mode = mode
         self.data_accessor = data_manager.DataAccessor(self.mode)
 
-        self.background_label = "Background"
+        # self.background_label = "Background"
+        self.background_label = data_manager.background_label
         self.iou_thresh =  0.3
         self.truncate= truncate
 
