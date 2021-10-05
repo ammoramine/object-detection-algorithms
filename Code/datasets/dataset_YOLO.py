@@ -132,8 +132,8 @@ class DatasetYOLO(Dataset):
             inpts.append(inpt)
             outpts.append(outpt)
         import torch
-        inpts = torch.stack(inpts,axis=0)
-        outpts = torch.stack(outpts,axis=0)
+        inpts = torch.stack(inpts)
+        outpts = torch.stack(outpts)
 
         return inpts,outpts
 
@@ -151,3 +151,4 @@ if __name__ == '__main__':
 
     # collate_fn = partial(dataset.collate_fn,device=device)
     train_loader = DataLoader(dataset, batch_size=10, collate_fn=dataset.collate_fn, drop_last=True,shuffle=True)
+
