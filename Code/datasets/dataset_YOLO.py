@@ -40,11 +40,13 @@ class DatasetYOLO(Dataset):
         self.B = B
         self.target_shape = target_shape
 
-        self.bbox_grid_inst = bbox_grid.BboxGrid( self.S, self.B, img_shape = self.target_shape)
 
         self.labels_to_int = self.get_labels_to_int()
+        self.bbox_grid_inst = bbox_grid.BboxGrid( self.S, self.B, img_shape = self.target_shape)
         self.T1 = lbdbbox_grid_to_tensor.LbdBBoxesContToTensor(self.bbox_grid_inst,self.labels_to_int)
         self.to_tensor = transforms.ToTensor()
+        self.T2 = transforms.Resize(self.target_shape)
+
     def get_unique_labels(self):
         codes = self.groundTruth.LabelName.unique()
         labels = data_manager.get_names_from_codes(codes)
@@ -117,15 +119,35 @@ class DatasetYOLO(Dataset):
         if self.with_transform:
             bbox_gd_cont_to_labels = dict(zip(bboxes_gd_cont, labels))
 
+            inpts = self.T2(self.to_tensor(pil_img))
             outpts = self.T1(bbox_gd_cont_to_labels)
 
-            return self.to_tensor(pil_img),outpts
+            return inpts,outpts
         else:
             return pil_img,bboxes_gd_cont,labels
 
+    def collate_fn(self,batch):
+        inpts,outpts = [],[]
+        for inpt,outpt in  batch:
+            inpts.append(inpt)
+            outpts.append(outpt)
+        import torch
+        inpts = torch.stack(inpts,axis=0)
+        outpts = torch.stack(outpts,axis=0)
 
-    def draw_bbox_on_image(self,idx):
-        img, bboxes,labels = self[idx]
-        for bbox in bboxes:
-            bbox.draw_on_image(img,False)
-        img.show()
+        return inpts,outpts
+
+    # def draw_bbox_on_image(self,idx):
+    #     img, bboxes,labels = self[idx]
+    #     for bbox in bboxes:
+    #         bbox.draw_on_image(img,False)
+    #     img.show()
+
+if __name__ == '__main__':
+    from torch.utils.data import DataLoader
+    from functools import partial
+
+    dataset = DatasetYOLO(mode="train")
+
+    # collate_fn = partial(dataset.collate_fn,device=device)
+    train_loader = DataLoader(dataset, batch_size=10, collate_fn=dataset.collate_fn, drop_last=True,shuffle=True)
