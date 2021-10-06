@@ -15,6 +15,16 @@ from collections import namedtuple
 from  Code.datasets.dataset_RCNN import DatasetRCNN
 
 Results = namedtuple("Results",["loss", "loc_loss", "regr_loss","accuracy"])
+
+def add_results_info_to(self, message=""):
+    """show informations about selfs"""
+    message += f" total loss is {self.loss}  "
+    message += f" loc loss is {self.loc_loss}  "
+    message += f" regr loss is {self.regr_loss}  "
+    message += f" accuracy loss is {self.accuracy} \n "
+    return message
+Results.add_results_info_to = add_results_info_to
+
 class Trainer:
     def __init__(self,model,train_loader,val_loader,loss_func,metric,optimizer):
         self.model = model
@@ -38,7 +48,6 @@ class Trainer:
         """
         self.metric.reset()
         loss,loc_loss,regr_loss,accs = 0,0,0,0
-        from tqdm import tqdm
         for data in tqdm(batch_loader):
             loss_tmp, loc_loss_tmp, regr_loss_tmp = batch_processor(data)
             loss += loss_tmp
@@ -64,18 +73,17 @@ class Trainer:
         for epoch in range(nb_epochs):
             trn_out, val_out = self.iterate_over_epoch()
 
-            self.val_results.append(Results(*val_out))
-            self.train_results.append(Results(*trn_out))
+            res_val = Results(*val_out)
+            res_trn = Results(*trn_out)
+            self.val_results.append(res_val)
+            self.train_results.append(res_trn)
 
-            message = f"result for epoch :"
-            if isinstance(epoch,int):
-                message += f"{epoch}"
-            for mode,res in zip(["training","validation"],[trn_out,val_out]):
-                message += f"{mode} total loss is {res[0]}"
-                message += f"{mode} loc loss is {res[1]}"
-                message += f"{mode} regr loss is {res[2]}"
-                message += f"{mode} accuracy loss is {res[3]}"
-            print(message)
+            message = f" Results for epoch {epoch} : \n"
+
+            for mode,res in zip(["training","validation"],[res_trn,res_val]):
+                message += f"mode {mode} \n"
+                message =res.add_results_info_to(message)
+                print(message)
 
     def train_batch(self,data):
         self.model.train()
@@ -109,12 +117,19 @@ if __name__ == '__main__':
 
     device = "cpu"
     train_ds = DatasetRCNN(mode="train")
-    collate_fn = partial(train_ds.collate_fn,device=device)
-    train_loader = DataLoader(train_ds, batch_size=2, collate_fn=collate_fn, drop_last=True,shuffle=True)
-
     val_ds = DatasetRCNN(mode="validation")
-    collate_fn = partial(val_ds.collate_fn,device=device)
-    val_loader = DataLoader(val_ds, batch_size=2, collate_fn=collate_fn, drop_last=True,shuffle=True)
+
+    # ds =
+
+    from Code import utils
+    trn_collate_fn = partial(train_ds.collate_fn,device=device)
+    val_collate_fn = partial(val_ds.collate_fn,device=device)
+
+    truncate = 3
+    train_ds,val_ds = [ utils.truncate_dataset(ds,truncate) for ds in [train_ds,val_ds]]
+
+    train_loader = DataLoader(train_ds, batch_size=2, collate_fn=trn_collate_fn, drop_last=True,shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=2, collate_fn=val_collate_fn, drop_last=True,shuffle=True)
 
 
     nb_classes = 3
@@ -128,6 +143,8 @@ if __name__ == '__main__':
 
     metric = RCNNMetric(nb_classes)
 
+
+
     args = dict()
     args["model"] = model
     args["train_loader"] = train_loader
@@ -140,4 +157,4 @@ if __name__ == '__main__':
 
     alg_trainer =  Trainer(**args)
 
-    alg_trainer.iterate_over_multiple_epochs(5)
+    alg_trainer.iterate_over_multiple_epochs(1)
