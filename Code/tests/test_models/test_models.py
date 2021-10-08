@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from ..models import yolo_v3model
+from Code.models import yolo_v3model
 
 
 def test_yolo_model():
