@@ -1,6 +1,6 @@
 import pytest
 
-from ..utils import bbox_mod
+from Code.utils import bbox_mod
 
 def test_if_intersetion_works():
     #intersection should be null

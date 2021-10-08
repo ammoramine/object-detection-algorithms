@@ -1,5 +1,5 @@
 try:
-    from ..utils import bbox_grid,bbox_cont
+    from Code.utils import bbox_grid,bbox_cont
 except:
     from Code.utils import bbox_grid,bbox_cont
 import pytest
