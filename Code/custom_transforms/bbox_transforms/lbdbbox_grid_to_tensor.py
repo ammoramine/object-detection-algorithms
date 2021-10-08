@@ -1,5 +1,5 @@
 try:
-    from . import bbox_grid,bbox_cont
+    from Code.utils import bbox_grid,bbox_cont
 except:
     from Code.utils import bbox_grid,bbox_cont
 import torch,numpy as np
@@ -64,18 +64,3 @@ class LbdBBoxesContToTensor:
                 outpt[5*self.bbox_grid.B+label_as_int] = 1
         outpts = outpts.reshape(self.shape_tensor)
         return outpts
-
-    # def get_bbox_grid_from_target(self,target):
-    #     assert target.shape == self.shape_tensor
-    #     self.shape_tensor = self.shape_tensor.reshape(-1,self.shape_tensor[-1])
-    #     grid = []
-    #     for el in self.shape_tensor:
-    #         xs,yx,widths,heights,objectnesses = [el[i:5*self.bbox_grid.B:5] for i in range(5)]
-    #         idx = torch.argmax(el[5*self.bbox_grid.B:],axis=-1)
-    #         label = self.int_to_labels[idx]
-    #         for (x,y,w,h,objectness) in zip(xs,yx,widths,heights,objectnesses):
-    #             if objectness>0.5:
-    #                 bbox_cont_inst = bbox_cont.BboxCont.construct_from_simple_params(x,y,w,h,self.bbox_grid.img_shape)
-    #                 grid.append(bbox_cont_inst)
-    #     return grid,label
-    #

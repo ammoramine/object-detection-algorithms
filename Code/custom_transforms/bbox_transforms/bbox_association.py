@@ -1,4 +1,4 @@
-from . import  selective_search
+from Code.custom_transforms import  selective_search
 
 import numpy as np
 
