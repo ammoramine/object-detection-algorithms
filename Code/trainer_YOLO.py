@@ -1,12 +1,10 @@
 import torch
 try:
-    from . import loss
-    from .models import rcnn_model
-    from .loss import loss_YOLO
+    from .models import yolo_v3model
+    from .losses import loss_YOLO
 except:
-    from Code import loss
-    from Code.models import rcnn_model
-    from Code import loss_YOLO
+    from Code.models import yolo_v3model
+    from Code.losses import loss_YOLO
 
 from tqdm import tqdm
 from collections import namedtuple
@@ -106,3 +104,53 @@ class Trainer:
         self.metric.update(clss_pred,clss_target)
         #TODO : include accuracy for bbox detection (look at YOLO)
         return loss,loc_loss,regr_loss
+
+
+if __name__ == '__main__':
+    from torch.utils.data import DataLoader
+    from Code.datasets import dataset_YOLO
+    from Code.metrics import yolo_metric
+    from Code import utils
+
+    device = "cpu"
+    train_ds = dataset_YOLO.DatasetYOLO(mode="train")
+    val_ds = dataset_YOLO.DatasetYOLO(mode="validation")
+
+    # ds =
+
+    # from Code import utils
+    trn_collate_fn = train_ds.collate_fn
+    val_collate_fn = val_ds.collate_fn
+    #
+    # truncate = 3
+    # train_ds,val_ds = [ utils.truncate_dataset(ds,truncate) for ds in [train_ds,val_ds]]
+
+    train_loader = DataLoader(train_ds, batch_size=12, collate_fn = trn_collate_fn, drop_last=True,shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=12, collate_fn = val_collate_fn, drop_last=True,shuffle=True)
+
+    #
+    nb_classes = 3
+    model = yolo_v3model.YoloModel(nb_classes).to(device)
+
+    loss_func = loss_YOLO.YOLOLoss()
+
+    # optimizer = optim.SGD(model.parameters(), lr=1e-3)
+    #
+    #
+    # metric = RCNNMetric(nb_classes)
+    #
+    #
+    #
+    # args = dict()
+    # args["model"] = model
+    # args["train_loader"] = train_loader
+    # args["val_loader"] = val_loader
+    # args["loss_func"] = loss_func
+    # args["metric"] = metric
+    # args["optimizer"] = optimizer
+    #
+    #
+    #
+    # alg_trainer =  Trainer(**args)
+    #
+    # alg_trainer.iterate_over_multiple_epochs(1)
