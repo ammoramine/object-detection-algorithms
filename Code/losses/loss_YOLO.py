@@ -8,6 +8,14 @@ class YOLOLoss:
         self.lbd_no_obj = 0.5
 
     def __call__(self, pred, target):
+        """
+        preds and target are supposed to be aligned : i.e the  bbox if index 'i' of preds and targets
+        associated for each i in range(B), B number of bboxes per grid cell
+
+        :param preds: tensor of shape (N,S,S,5*B+nb_classses)
+        :param targets: tensor of same shape as preds
+        :return:
+        """
         res = 0
         preds_bboxes,targets_bboxes = [[tmp[...,:5],tmp[...,5:10] ] for tmp in [pred,target]]
         onesij = []
