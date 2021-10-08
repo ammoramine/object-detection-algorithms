@@ -22,7 +22,13 @@ class YOLOMetric(Metric):
         # at (nb_classes,j), the sample from class j is badly localized
         # self.add_state("",torch.Tensor(self.nb_classes,self.nb_classes))
     def update(self,preds,targets):
-        """preds and target are tensor of shape (N,S,S,5*B+nb_classses)"""
+        """
+        preds and target are supposed to be filtered
+        :param preds: tensor of shape (N,S,S,5*B+nb_classses)
+        :param targets: tensor of same shape as preds
+        :return:
+        """
+
         # we parse the tensor preds value to B tensor, one for each box
         # plus a tensor for classifiaction
         # we do the same from the targets, we compute IOU,
@@ -34,6 +40,11 @@ class YOLOMetric(Metric):
         # with the max iou
         # for each pred_bbox, if the iou, is below a certain value , we keep
         # it
+        # preds and targets have for each cell multiple bboxes.
+        # these multiple bboxes should be correctly associated,
+        # we should thence write routines for that.
+
+
         preds = preds.reshape(preds.shape[0], -1, preds.shape[-1])
         targets = targets.reshape(targets.shape[0], -1, targets.shape[-1])
         for pred,target in zip(preds,targets):
