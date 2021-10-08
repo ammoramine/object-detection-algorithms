@@ -1,8 +1,7 @@
 try:
-    from Code.utils import bbox_cont
-    from Code.utils.utils_bbox import bbox_mod
+    from . import bbox_mod,bbox_cont
 except:
-    from Code.utils import bbox_mod,bbox_cont
+    from Code.utils.utils_bbox import bbox_mod,bbox_cont
 
 
 class BboxGrid:

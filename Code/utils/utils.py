@@ -1,10 +1,9 @@
 import pandas as pd
-from . import bbox_mod
+from .utils_bbox import bbox_mod
 
 BboxParams = bbox_mod.BboxParams
 Bbox = bbox_mod.Bbox
 
-from Code.utils.bbox_mod import BboxParams
 
 def transforms_iterable_to_idxs(iterable):
     """

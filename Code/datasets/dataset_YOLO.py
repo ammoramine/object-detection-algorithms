@@ -14,12 +14,12 @@ dir_file = Path(__file__).parent
 
 try:
     from ...Data import data_manager
-    from ..utils import bbox_cont, bbox_grid,bbox_mod
+    from ..utils.utils_bbox import bbox_cont, bbox_grid,bbox_mod
 except:
     from Code.utils import bbox_mod
     from Data import data_manager
-    from Code.utils import bbox_cont, bbox_grid
-    from Code.utils import lbdbbox_grid_to_tensor
+    from Code.utils.utils_bbox import bbox_cont, bbox_grid,bbox_mod
+    from Code.custom_transforms.bbox_transforms import lbdbbox_grid_to_tensor
 
 
 from torchvision import transforms
