@@ -1,4 +1,4 @@
-from . import bbox_mod
+from Code.utils.utils_bbox import bbox_mod
 
 import numpy as np
 
@@ -23,7 +23,7 @@ class BboxCont:
     def construct_from_simple_params(cls,*params):
         """more explicitly from the params (x,y,width,height,const_shape)"""
         x,y,width,height,const_shape = params
-        res = cls(bbox_mod.Bbox(x,y,width,height),const_shape)
+        res = cls(bbox_mod.Bbox(x, y, width, height), const_shape)
         res.check_if_inside_cont()
         return res
 
@@ -56,7 +56,7 @@ class BboxCont:
         y *= ratio_height
         width *= ratio_width
         height *= ratio_height
-        new_bbox = bbox_mod.Bbox(x,y,width,height)
+        new_bbox = bbox_mod.Bbox(x, y, width, height)
         return new_bbox
 
     def set_bbox_for_new_shape(self,tgt_shape):
@@ -76,7 +76,7 @@ class BboxCont:
         x1, y1, width1, height1 = self.bbox
         x2, y2, width2, height2 = other.bbox
 
-        res = bbox_mod.Bbox((x2 - x1)/width1,(y2-y1)/height1,width2/self.cont_shape[1],height2/self.cont_shape[0])
+        res = bbox_mod.Bbox((x2 - x1) / width1, (y2 - y1) / height1, width2 / self.cont_shape[1], height2 / self.cont_shape[0])
 
         for el in [res.x,res.y]:
             assert (el>=0)*(el<1)

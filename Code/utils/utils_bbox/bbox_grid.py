@@ -1,9 +1,8 @@
 try:
-    from . import bbox_mod,bbox_cont
+    from Code.utils import bbox_cont
+    from Code.utils.utils_bbox import bbox_mod
 except:
     from Code.utils import bbox_mod,bbox_cont
-
-import torch
 
 
 class BboxGrid:
@@ -32,7 +31,7 @@ class BboxGrid:
         for i in range(self.S):
             for j in range(self.S):
                 # print(i,j)
-                bbox = bbox_mod.Bbox(stride_col*j,stride_row*i,stride_col,stride_row)
+                bbox = bbox_mod.Bbox(stride_col * j, stride_row * i, stride_col, stride_row)
                 bbox_cont_inst = bbox_cont.BboxCont(bbox, self.img_shape)
                 grid.append(bbox_cont_inst)
         return grid
