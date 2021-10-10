@@ -25,9 +25,9 @@ class LbdBBoxesContToTensor:
         self.labels_to_int = labels_to_int
         self.nb_classes = len(labels_to_int)
 
-        self.shape_tensor = self.bbox_grid.S, self.bbox_grid.S, 5 * self.bbox_grid.B + self.nb_classes
+        self.shape_tensor = 5 * self.bbox_grid.B + self.nb_classes,self.bbox_grid.S, self.bbox_grid.S
 
-        self.squeezed_shape_tensor = (np.product(self.shape_tensor[:2]),self.shape_tensor[-1])
+        self.squeezed_shape_tensor = (self.shape_tensor[0],np.product(self.shape_tensor[1:]))
 
     def associate(self,gd_bboxes_cont_to_labels):
         gd_bboxes_cont = gd_bboxes_cont_to_labels.keys()
@@ -47,10 +47,10 @@ class LbdBBoxesContToTensor:
         """
         self.associate(gd_bboxes_cont_to_labels)
         outpts = torch.zeros(self.squeezed_shape_tensor)
-        for grid_cell,outpt in zip(self.bbox_grid.grid,outpts):
+        for grid_cell,outpt in zip(self.bbox_grid.grid,torch.transpose(outpts,0,1)):
             if len(grid_cell.associations) > 0:
                 for i,association in enumerate(grid_cell.associations):
-                    x, y, w, h = grid_cell.get_relative_position(association)
+                    x, y, w, h = association
                     outpt[5*i+0] = x
                     outpt[5*i+1] = y
                     outpt[5*i+2] = w
