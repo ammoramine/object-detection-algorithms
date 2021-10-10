@@ -23,14 +23,14 @@ class BboxGrid:
 
     def construct_grid(self):
         """of disjoint bboxes, equally spaced """
-        stride_row = self.img_shape[0]/self.S
-        stride_col = self.img_shape[1]/self.S
+        self.stride_row = self.img_shape[0]/self.S
+        self.stride_col = self.img_shape[1]/self.S
 
         grid = []
         for i in range(self.S):
             for j in range(self.S):
                 # print(i,j)
-                bbox = bbox_mod.Bbox(stride_col * j, stride_row * i, stride_col, stride_row)
+                bbox = bbox_mod.Bbox(self.stride_col * j, self.stride_row * i, self.stride_col, self.stride_row)
                 bbox_cont_inst = bbox_cont.BboxCont(bbox, self.img_shape)
                 grid.append(bbox_cont_inst)
         return grid
@@ -51,6 +51,8 @@ class BboxGrid:
         for gd_bbox in self.gd_bboxes_cont:
             for grid_cell in self.grid:
                 test = grid_cell.test_and_add_bbox_with_img(gd_bbox)
+                # test if gd_bbox can be associated to grid_cell (center in bbox surface),
+                # and add if True
                 if test:
                     # it test succeed go out of the loop, because gd_bbox can only be associated
                     # once to the grid cell
@@ -65,6 +67,7 @@ class BboxGrid:
         for grid_cell in self.grid:
             if len(grid_cell.associations) > self.B:
                 # each grid_cell, have a limited number of associations
+                self.reset_associations()
                 raise ValueError(f"can't associate more than self.B == {self.B} elements"
                                  f"to the grid_cell, chek the dataset,"
                                  f"then change the value of self.B , to higher value of "
