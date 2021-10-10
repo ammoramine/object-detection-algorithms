@@ -15,11 +15,13 @@ dir_file = Path(__file__).parent
 try:
     from ...Data import data_manager
     from ..utils.utils_bbox import bbox_cont, bbox_grid,bbox_mod
+    from ..custom_transforms.bbox_transforms import bbox_cont_to_tensor,tensor_to_bboxcont
+
 except:
     from Code.utils import bbox_mod
     from Data import data_manager
     from Code.utils.utils_bbox import bbox_cont, bbox_grid,bbox_mod
-    from Code.custom_transforms.bbox_transforms import lbdbbox_grid_to_tensor
+    from Code.custom_transforms.bbox_transforms import bbox_cont_to_tensor,tensor_to_bboxcont
 
 
 from torchvision import transforms
@@ -42,8 +44,18 @@ class DatasetYOLO(Dataset):
 
 
         self.labels_to_int = self.get_labels_to_int()
+        self.int_to_labels = {value:key for (key,value) in self.labels_to_int.items()}
+
         self.bbox_grid_inst = bbox_grid.BboxGrid( self.S, self.B, img_shape = self.target_shape)
-        self.T1 = lbdbbox_grid_to_tensor.LbdBBoxesContToTensor(self.bbox_grid_inst,self.labels_to_int)
+
+        #self.bbox_grid_int is a intermediate object from conversion between tensor from,
+        # and bbox form of ground truth
+
+        self.bboxes_to_tensor = bbox_cont_to_tensor.LbdBBoxesContToTensor(self.bbox_grid_inst,self.labels_to_int)
+
+        self.tensor_to_bboxes = tensor_to_bboxcont.TensorToLbdBBoxesCont(self.int_to_labels,self.bbox_grid_inst)
+
+
         self.to_tensor = transforms.ToTensor()
         self.T2 = transforms.Resize(self.target_shape)
 
@@ -120,7 +132,7 @@ class DatasetYOLO(Dataset):
             bbox_gd_cont_to_labels = dict(zip(bboxes_gd_cont, labels))
 
             inpts = self.T2(self.to_tensor(pil_img))
-            outpts = self.T1(bbox_gd_cont_to_labels)
+            outpts = self.bboxes_to_tensor(bbox_gd_cont_to_labels)
 
             return inpts,outpts
         else:
@@ -145,7 +157,6 @@ class DatasetYOLO(Dataset):
 
 if __name__ == '__main__':
     from torch.utils.data import DataLoader
-    from functools import partial
 
     dataset = DatasetYOLO(mode="train")
 
