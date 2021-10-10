@@ -24,6 +24,29 @@ class YoloModel(nn.Module):
         # we build then a fully connected layer, to outputs predictions
         self.fully_conn_layer = self.get_fully_connected_Layer()
 
+        self.softmax_activation = torch.nn.Softmax()
+        self.sigmoid_activation = torch.nn.Sigmoid()
+
+    def get_classifications(self,out):
+        res = out[..., 5*self.B:, :, :]
+        return res
+
+    def get_bbox_info(self,out):
+        res = out[..., :5 * self.B, :, :]
+        return res
+
+    def apply_activations(self,out):
+        """
+            softmax for the classification, and sigmoid for the
+            relative bbox positions
+            the element are stacked at axis=-3, to take into account
+
+        """
+        out_class = self.get_classifications(out)
+        out_bbox = self.get_bbox_info(out)
+        out_class = self.softmax_activation(out_class)
+        out_bbox = self.sigmoid_activation(out_bbox)
+        return  torch.cat([out_bbox,out_class],axis=-3)
 
     def get_vgg16_bn_feaures(self):
         """
@@ -61,7 +84,7 @@ class YoloModel(nn.Module):
         tmp = self.drop_out(tmp)
         tmp = self.new_conv_layer(tmp)
         tmp = self.fully_conn_layer(tmp)
-
+        tmp = self.apply_activations(tmp)
         out = tmp
         return out
 
@@ -76,9 +99,9 @@ if __name__ == '__main__':
     tmp = self.vgg16_bn_feat(inpt)
     tmp = self.drop_out(tmp)
     tmp = self.new_conv_layer(tmp)
-    assert tmp.shape[1:] == torch.Size((1024 ,self.S,self.S))
-    out = self.fully_conn_layer(tmp)
-
-    assert out.shape[1:] == torch.Size((self.S,self.S,5*self.B + self.nb_classes))
-
-    assert out.shape[0] == N
+    # assert tmp.shape[1:] == torch.Size((1024 ,self.S,self.S))
+    # out = self.fully_conn_layer(tmp)
+    #
+    # assert out.shape[1:] == torch.Size((self.S,self.S,5*self.B + self.nb_classes))
+    #
+    # assert out.shape[0] == N
