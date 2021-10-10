@@ -133,24 +133,3 @@ if __name__ == '__main__':
     model = yolo_v3model.YoloModel(nb_classes).to(device)
 
     loss_func = loss_YOLO.YOLOLoss()
-
-    # optimizer = optim.SGD(model.parameters(), lr=1e-3)
-    #
-    #
-    # metric = RCNNMetric(nb_classes)
-    #
-    #
-    #
-    # args = dict()
-    # args["model"] = model
-    # args["train_loader"] = train_loader
-    # args["val_loader"] = val_loader
-    # args["loss_func"] = loss_func
-    # args["metric"] = metric
-    # args["optimizer"] = optimizer
-    #
-    #
-    #
-    # alg_trainer =  Trainer(**args)
-    #
-    # alg_trainer.iterate_over_multiple_epochs(1)
