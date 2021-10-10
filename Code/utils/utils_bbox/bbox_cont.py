@@ -44,6 +44,8 @@ class BboxCont:
         self.associations = []
         assert self.check_if_inside_cont()
 
+    def __iter__(self):
+        return self.bbox.__iter__()
 
     def __repr__(self):
         message = f"BboxCont(bbox = {self.bbox},cont_shape = {self.cont_shape})"
@@ -63,27 +65,27 @@ class BboxCont:
         self.bbox = self.get_new_bbox_for_new_shape(tgt_shape)
         self.cont_shape = tgt_shape
 
-    def get_relative_position(self,other):
-        """
-            of 'other'
-            get bounding box other,with TP position, expressed as offset of self
-            and width,height, expressed as ratio to the height and width of the whole image
-        """
-
-        assert isinstance(other,type(self)),f"{other} must be of same type as self"
-        self.check_same_cont_shape(other)
-
-        x1, y1, width1, height1 = self.bbox
-        x2, y2, width2, height2 = other.bbox
-
-        res = bbox_mod.Bbox((x2 - x1) / width1, (y2 - y1) / height1, width2 / self.cont_shape[1], height2 / self.cont_shape[0])
-
-        for el in [res.x,res.y]:
-            assert (el>=0)*(el<1)
-        for el in [res.width,res.height]:
-            assert (el>=0)*(el<=1)
-
-        return res
+    # def get_relative_position(self,other):
+    #     """
+    #         of 'other'
+    #         get bounding box other,with TP position, expressed as offset of self
+    #         and width,height, expressed as ratio to the height and width of the whole image
+    #     """
+    #
+    #     assert isinstance(other,type(self)),f"{other} must be of same type as self"
+    #     self.check_same_cont_shape(other)
+    #
+    #     x1, y1, width1, height1 = self.bbox
+    #     x2, y2, width2, height2 = other.bbox
+    #
+    #     res = bbox_mod.Bbox((x2 - x1) / width1, (y2 - y1) / height1, width2 / self.cont_shape[1], height2 / self.cont_shape[0])
+    #
+    #     for el in [res.x,res.y]:
+    #         assert (el>=0)*(el<1)
+    #     for el in [res.width,res.height]:
+    #         assert (el>=0)*(el<=1)
+    #
+    #     return res
     def check_same_cont_shape(self,other):
         assert self.cont_shape == other.cont_shape,"can't compare different BboxCont, with different" \
                                                  "cont_shape"
