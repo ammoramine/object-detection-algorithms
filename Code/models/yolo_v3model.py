@@ -11,7 +11,7 @@ class YoloModel(nn.Module):
         self.S = S
         self.B = B
 
-        self.shape_dst = self.S,self.S,5*self.B+self.nb_classes
+        self.shape_dst = 5*self.B+self.nb_classes,self.S,self.S
 
 
         self.vgg16_bn_feat = self.get_vgg16_bn_feaures()
