@@ -13,11 +13,11 @@ from pathlib import Path
 dir_file = Path(__file__).parent
 
 try:
-    from .utils import bbox_mod
-    from ..Data import data_manager
+    from ..utils.utils_bbox import bbox_mod
+    from ...Data import data_manager
     from . import custom_transforms
 except:
-    from Code.utils import bbox_mod
+    from Code.utils.utils_bbox import bbox_mod
     from Data import data_manager
     from Code import custom_transforms
 
